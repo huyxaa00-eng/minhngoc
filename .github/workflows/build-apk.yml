@@ -17,6 +17,7 @@ jobs:
       with:
         python-version: '3.10'
 
+    # Cài đặt các gói phụ trợ hệ thống cho Linux
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -34,22 +35,29 @@ jobs:
             libswscale-dev \
             libavformat-dev \
             libavcodec-dev \
-            zlib1g-dev
+            zlib1g-dev \
+            openjdk-17-jdk
 
+    # Cài đặt Cython và Buildozer phiên bản ổn định
     - name: Install Buildozer and Cython
       run: |
         pip install --upgrade pip
         pip install Cython==0.29.33 buildozer
 
+    # Thêm cấu hình chấp nhận giấy phép Android SDK để Buildozer tự tải aidl, sdk, ndk
     - name: Build with Buildozer
       run: |
-        # Nếu bạn chưa có file buildozer.spec, lệnh này sẽ tự tạo ra
         if [ ! -f "buildozer.spec" ]; then
           buildozer init
         fi
-        # Tiến hành build APK
+        
+        # Cấu hình tự động chấp nhận SDK license nếu cần
+        export ACCEPT_LICENSE=1
+        
+        # Tiến hành build
         buildozer -v android debug
 
+    # Lưu lại file APK sau khi build xong
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
